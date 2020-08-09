@@ -13,15 +13,78 @@ EVENT(TourName, EventYear, EventMonth, EventDay, Fee)
 PK: EventYear, EventMonth, EvenDay, TourName
 FK1: TourName references TOUR
 
-BOOKING(ClientID, EventYear, EventMonth, EventDay, DateBooked, Payment)
-PK: ClientID, EventYear, EventMonth, EventDay
+BOOKING(ClientID, Tourname, EventYear, EventMonth, EventDay, DateBooked, Payment)
+PK: ClientID, Tourname, EventYear, EventMonth, EventDay
 FK1: ClientID references CLIENT
-FK2: EventYear references EVENT
-FK3: EventMonth references EVENT
-FK4: EventDay references EVENT
+FK2: Tourname, EventYear, EventMonth, EventDay references EVENT
 
 CLIENT(ClientID, Surname, GivenName, Gender)
 PK: ClientID
 */
 
+
+-- Create a new database called 'BUILDQUERYDATABASE'
+-- Connect to the 'master' database to run this snippet
+USE master
+GO
+-- Create the new database if it does not exist already
+IF NOT EXISTS (
+    SELECT name
+        FROM sys.databases
+        WHERE name = N'BUILDQUERYDATABASE'
+)
+CREATE DATABASE BUILDQUERYDATABASE
+GO
+
+USE BUILDQUERYDATABASE
+
+IF OBJECT_ID('TOUR') IS NOT NULL
+DROP TABLE TOUR;
+
+IF OBJECT_ID('EVENTS') IS NOT NULL
+DROP TABLE EVENTS;
+
+IF OBJECT_ID('BOOKING') IS NOT NULL
+DROP TABLE BOOKING;
+
+IF OBJECT_ID('CLIENT') IS NOT NULL
+DROP TABLE CLIENT;
+
+CREATE TABLE TOUR(
+    TOURNAME NVARCHAR(50),
+    TOURDESCRIPT NVARCHAR(1000),
+    PRIMARY KEY(TOURNAME)
+);
+
+CREATE TABLE EVENTS(
+    TOURNAME NVARCHAR(50),
+    EVENTYEAR INT,
+    EVENTMONTH NVARCHAR(15),
+    EVENTDAY NVARCHAR(10),
+    EVENTFEE INT,
+    PRIMARY KEY(TOURNAME, EVENTYEAR, EVENTMONTH, EVENTDAY),
+    FOREIGN KEY(TOURNAME) REFERENCES TOUR 
+);
+CREATE TABLE CLIENT(
+    CLIENTID INT,
+    SURNAME NVARCHAR(50),
+    GIVENNAME NVARCHAR(50),
+    GENDER NVARCHAR(1),
+    PRIMARY KEY(CLIENTID)
+); 
+
+CREATE TABLE BOOKING(
+    CLIENTID INT,
+    TOURNAME NVARCHAR(50),
+    EVENTYEAR INT,
+    EVENTMONTH NVARCHAR(15),
+    EVENTDAY NVARCHAR(10),
+    DATEBOOKED DATE,
+    PAYMENT INT,
+    PRIMARY KEY(CLIENTID),
+    FOREIGN KEY(CLIENTID) REFERENCES CLIENT,
+    FOREIGN KEY(TOURNAME, EVENTYEAR, EVENTMONTH, EVENTDAY) REFERENCES EVENTS
+);
+
+SELECT * FROM TOUR, EVENTS, CLIENT, BOOKING
 
